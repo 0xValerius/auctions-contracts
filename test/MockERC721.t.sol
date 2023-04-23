@@ -26,7 +26,6 @@ contract MockNFTTest is Test {
 
     // Test the deployment of the MockNFT contract.
     function test_MockNFTDeploy() public {
-        // check that the contract was correctly deployed
         assertEq(nft.name(), "MockNFT");
         assertEq(nft.symbol(), "MOCK");
         assertEq(nft.balanceOf(actor2), 1);

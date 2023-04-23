@@ -23,6 +23,13 @@ contract DutchAuction {
         address _nft,
         uint256 _tokenId
     ) {
+        require(_startPrice > _minPrice, "DutchAuction: startPrice must be greater than minPrice.");
+        require(_startAt > block.timestamp, "DutchAuction: startAt must be in the future.");
+        require(_startAt + _duration > block.timestamp, "DutchAuction: endAt must be in the future.");
+        require(_nft != address(0), "DutchAuction: nft cannot be the zero address.");
+        require(_minPrice > 0, "DutchAuction: minPrice must be greater than 0.");
+        require(_minPrice < _startPrice, "DutchAuction: minPrice must be less than startPrice.");
+
         seller = payable(msg.sender);
         duration = _duration;
         startAt = _startAt;
@@ -31,15 +38,12 @@ contract DutchAuction {
         minPrice = _minPrice;
         nft = IERC721(_nft);
         tokenId = _tokenId;
-
-        require(_startPrice > _minPrice, "DutchAuction: startPrice must be greater than minPrice.");
-        require(_startAt > block.timestamp, "DutchAuction: startAt must be in the future.");
-        require(_startAt + _duration > block.timestamp, "DutchAuction: endAt must be in the future.");
     }
 
     function getPrice() public view returns (uint256) {
         require(block.timestamp >= startAt, "DutchAuction: auction has not started yet.");
         require(block.timestamp <= endAt, "DutchAuction: auction has already ended.");
+        require(isEscrowed(), "DutchAuction: NFT is not escrowed.");
 
         // DiscountRate = (startPrice - minPrice) / duration
         return startPrice - ((startPrice - minPrice) * (block.timestamp - startAt)) / duration;
@@ -50,7 +54,7 @@ contract DutchAuction {
         return nft.ownerOf(tokenId) == address(this);
     }
 
-    function buy() external payable {
+    function bid() external payable {
         require(isEscrowed(), "DutchAuction: NFT is not escrowed.");
         require(msg.sender != seller, "DutchAuction: seller cannot buy.");
         require(block.timestamp >= startAt, "DutchAuction: auction has not started yet.");

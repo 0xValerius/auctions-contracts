@@ -35,12 +35,12 @@ contract DutchAuction {
         address _nft,
         uint256 _tokenId
     ) {
-        require(_startPrice > _minPrice, "DutchAuction: startPrice must be greater than minPrice.");
+        require(_duration > 0, "DutchAuction: duration must be greater than 0.");
         require(_startAt > block.timestamp, "DutchAuction: startAt must be in the future.");
-        require(_startAt + _duration > block.timestamp, "DutchAuction: endAt must be in the future.");
-        require(_nft != address(0), "DutchAuction: nft cannot be the zero address.");
+        require(_startPrice > _minPrice, "DutchAuction: startPrice must be greater than minPrice.");
         require(_minPrice > 0, "DutchAuction: minPrice must be greater than 0.");
         require(_minPrice < _startPrice, "DutchAuction: minPrice must be less than startPrice.");
+        require(_nft != address(0), "DutchAuction: nft cannot be the zero address.");
 
         seller = payable(msg.sender);
         duration = _duration;
@@ -67,10 +67,10 @@ contract DutchAuction {
     }
 
     function bid() external payable {
-        require(isEscrowed(), "DutchAuction: NFT is not escrowed.");
-        require(msg.sender != seller, "DutchAuction: seller cannot bid.");
         require(block.timestamp >= startAt, "DutchAuction: auction has not started yet.");
         require(block.timestamp <= endAt, "DutchAuction: auction has already ended.");
+        require(isEscrowed(), "DutchAuction: NFT is not escrowed.");
+        require(msg.sender != seller, "DutchAuction: seller cannot bid.");
         require(msg.value >= getPrice(), "DutchAuction: msg.value must be greater than or equal to current price.");
 
         uint256 currentPrice = getPrice();
@@ -90,9 +90,9 @@ contract DutchAuction {
     }
 
     function noSale() external {
+        require(block.timestamp > endAt, "DutchAuction: auction has not ended yet.");
         require(isEscrowed(), "DutchAuction: NFT is not escrowed.");
         require(msg.sender == seller, "DutchAuction: only seller can call this function.");
-        require(block.timestamp > endAt, "DutchAuction: auction has not ended yet.");
 
         // Transfer the NFT back to the seller.
         nft.transferFrom(address(this), msg.sender, tokenId);

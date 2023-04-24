@@ -12,6 +12,7 @@ contract DutchAuctionTest is Test {
     DutchAuction auction;
 
     address deployer = address(0x1);
+    uint256 initialBalance = 1000;
     address actor2 = address(0x2);
     address actor3 = address(0x3);
     uint256 startPrice = 100;
@@ -23,9 +24,9 @@ contract DutchAuctionTest is Test {
 
     function setUp() public {
         // load address ether balances
-        vm.deal(deployer, 1000);
-        vm.deal(actor2, 1000);
-        vm.deal(actor3, 1000);
+        vm.deal(deployer, initialBalance);
+        vm.deal(actor2, initialBalance);
+        vm.deal(actor3, initialBalance);
 
         // deploy MockNFT
         nft = new MockNFT("MockNFT", "MOCK", deployer, tokenId);
@@ -92,11 +93,12 @@ contract DutchAuctionTest is Test {
     }
 
     // Test DutchAuction contract bid()
-    function test_bid() public {
+    function test_Bid() public {
         // send NFT to auction contract
         vm.startPrank(deployer);
         nft.approve(address(auction), tokenId);
         nft.transferFrom(deployer, address(auction), tokenId);
+        assertEq(nft.ownerOf(tokenId), address(auction));
         vm.stopPrank();
 
         // check bid before auction start
@@ -105,6 +107,65 @@ contract DutchAuctionTest is Test {
 
         // let the auction start
         vm.warp(startAt + duration / 3);
-        console.log(block.timestamp);
+
+        // revert when seller tries to buy
+        vm.startPrank(deployer);
+        vm.expectRevert("DutchAuction: seller cannot bid.");
+        auction.bid{value: 1000}();
+        vm.stopPrank();
+
+        // fetch price
+        uint256 price = auction.getPrice();
+
+        // revert on lower offer
+        vm.startPrank(actor2);
+        vm.expectRevert("DutchAuction: msg.value must be greater than or equal to current price.");
+        auction.bid{value: price - 10}();
+        vm.stopPrank();
+
+        // successfull bid and refund ETH excess
+        vm.startPrank(actor3);
+        auction.bid{value: price + 10}();
+        vm.stopPrank();
+        assertEq(actor3.balance, initialBalance - price);
+        assertEq(nft.ownerOf(tokenId), actor3);
+        assertEq(deployer.balance, initialBalance + price);
+        assertEq(address(auction).balance, 0);
+        assertEq(auction.isEscrowed(), false);
+    }
+
+    // Test DucthAuction contract noSale()
+    function test_noSale() public {
+        // send NFT to auction contract
+        vm.startPrank(deployer);
+        nft.approve(address(auction), tokenId);
+        nft.transferFrom(deployer, address(auction), tokenId);
+        assertEq(nft.ownerOf(tokenId), address(auction));
+
+        // check noSale before auction start
+        vm.expectRevert("DutchAuction: auction has not ended yet.");
+        auction.noSale();
+
+        // let the auction start
+        vm.warp(startAt + duration / 3);
+
+        // check noSale when auction is active
+        vm.expectRevert("DutchAuction: auction has not ended yet.");
+        auction.noSale();
+        vm.stopPrank();
+
+        // let the auction end
+        vm.warp(endAt + 1);
+
+        // check noSale when auction is ended and user tries to call it
+        vm.prank(actor2);
+        vm.expectRevert("DutchAuction: only seller can call this function.");
+        auction.noSale();
+
+        // check noSale when auction is ended and seller calls it
+        vm.startPrank(deployer);
+        auction.noSale();
+        vm.stopPrank();
+        assertEq(nft.ownerOf(tokenId), deployer);
     }
 }

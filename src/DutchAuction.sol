@@ -56,26 +56,30 @@ contract DutchAuction {
 
     function bid() external payable {
         require(isEscrowed(), "DutchAuction: NFT is not escrowed.");
-        require(msg.sender != seller, "DutchAuction: seller cannot buy.");
+        require(msg.sender != seller, "DutchAuction: seller cannot bid.");
         require(block.timestamp >= startAt, "DutchAuction: auction has not started yet.");
         require(block.timestamp <= endAt, "DutchAuction: auction has already ended.");
         require(msg.value >= getPrice(), "DutchAuction: msg.value must be greater than or equal to current price.");
 
-        // Transfer the NFT to the buyer.
+        uint256 currentPrice = getPrice();
+
+        // Transfer ETH to seller.
+        (bool sellerPayment,) = seller.call{value: currentPrice}("");
+        require(sellerPayment, "DutchAuction: ETH seller payment failed.");
+
+        // Transfer NFT to buyer.
         nft.transferFrom(address(this), msg.sender, tokenId);
 
-        // Transfer the ETH to the seller.
-        seller.transfer(getPrice());
-
-        // Refund the excess ETH to the buyer.
-        if (msg.value > getPrice()) {
-            payable(msg.sender).transfer(msg.value - getPrice());
+        // Refund excess ETH to buyer.
+        if (msg.value > currentPrice) {
+            (bool refund,) = payable(msg.sender).call{value: msg.value - currentPrice}("");
+            require(refund, "DutchAuction: ETH refund failed.");
         }
     }
 
     function noSale() external {
         require(isEscrowed(), "DutchAuction: NFT is not escrowed.");
-        require(msg.sender == seller, "DutchAuction: only seller can call noSale.");
+        require(msg.sender == seller, "DutchAuction: only seller can call this function.");
         require(block.timestamp > endAt, "DutchAuction: auction has not ended yet.");
 
         // Transfer the NFT back to the seller.

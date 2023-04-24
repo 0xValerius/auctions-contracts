@@ -52,6 +52,11 @@ contract DutchAuction {
         tokenId = _tokenId;
     }
 
+    // Return if the auctioned NFT is escrowed by this contract.
+    function isEscrowed() public view returns (bool) {
+        return nft.ownerOf(tokenId) == address(this);
+    }
+
     function getPrice() public view returns (uint256) {
         require(block.timestamp >= startAt, "DutchAuction: auction has not started yet.");
         require(block.timestamp <= endAt, "DutchAuction: auction has already ended.");
@@ -59,11 +64,6 @@ contract DutchAuction {
 
         // DiscountRate = (startPrice - minPrice) / duration
         return startPrice - ((startPrice - minPrice) * (block.timestamp - startAt)) / duration;
-    }
-
-    // Return if the auctioned NFT is escrowed by this contract.
-    function isEscrowed() public view returns (bool) {
-        return nft.ownerOf(tokenId) == address(this);
     }
 
     function bid() external payable {

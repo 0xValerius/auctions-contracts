@@ -6,7 +6,7 @@ This repository contains two types of NFT auction smart contracts written in Sol
 
 In a Dutch Auction, the auction starts with a high initial price which gradually decreases over time. Bidders can place a bid at any point during the auction, and the first bidder who accepts the current price wins the auction.
 
-## 🇬🇧 English style Auction
+## 🇬🇧 English Auction
 
 In an English style auction, bidders place successively higher bids until no higher bid is made before the auction duration ends. The highest bidder at the end of the auction wins the item.
 

@@ -76,6 +76,7 @@ contract DutchAuctionTest is Test {
         nft.approve(address(auction), tokenId);
         nft.transferFrom(deployer, address(auction), tokenId);
         assertEq(auction.isEscrowed(), true);
+        vm.stopPrank();
     }
 
     // Test DutchAuction contract getPrice()

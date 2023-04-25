@@ -1,4 +1,4 @@
-# NFT Auction Contracts 🖼️
+# 🖼️ 🎨 NFT Auction Contracts
 
 This repository contains two types of NFT auction smart contracts written in Solidity, Dutch Auction and English style auction.
 

@@ -19,6 +19,9 @@ import "forge-std/console.sol";
 import {MockNFT} from "src/MockERC721.sol";
 import {DutchAuction} from "src/DutchAuction.sol";
 
+/// @title DutchAuction.sol test contract
+/// @author @0xValerius
+/// @notice This contract tests the DutchAuction contract using the Forge Test framework.
 contract DutchAuctionTest is Test {
     MockNFT nft;
     DutchAuction auction;
@@ -34,6 +37,7 @@ contract DutchAuctionTest is Test {
     uint256 duration = 100;
     uint256 endAt = startAt + duration;
 
+    /// @notice Set up the test environment
     function setUp() public {
         // load address ether balances
         vm.deal(deployer, initialBalance);
@@ -48,7 +52,7 @@ contract DutchAuctionTest is Test {
         auction = new DutchAuction(duration, startAt, startPrice, minPrice, address(nft), tokenId);
     }
 
-    // Test the deployment of the MockNFT contract
+    /// @notice Test the deployment of the MockNFT contract
     function test_MockNFTDeploy() public {
         assertEq(nft.name(), "MockNFT");
         assertEq(nft.symbol(), "MOCK");
@@ -57,7 +61,7 @@ contract DutchAuctionTest is Test {
         assertEq(nft.ownerOf(tokenId), deployer);
     }
 
-    // Test the deployment of the DutchAuction contract
+    /// @notice Test the deployment of the DutchhAuction contract
     function test_DutchAuctionDeployment() public {
         assertEq(auction.seller(), deployer);
         assertEq(auction.duration(), duration);
@@ -69,7 +73,7 @@ contract DutchAuctionTest is Test {
         assertEq(auction.tokenId(), tokenId);
     }
 
-    // Test DutchAuction contract escrow
+    /// @notice Test the escrow process for the DutchAuction contract
     function test_DutchAuctionEscrow() public {
         assertEq(auction.isEscrowed(), false);
         vm.startPrank(deployer);
@@ -79,7 +83,7 @@ contract DutchAuctionTest is Test {
         vm.stopPrank();
     }
 
-    // Test DutchAuction contract getPrice()
+    /// @notice Test the DutchAuction contract getPrice() function
     function test_getPrice() public {
         // check price before auction start
         vm.expectRevert("DutchAuction: auction has not started yet.");
@@ -105,7 +109,7 @@ contract DutchAuctionTest is Test {
         assertEq(auction.getPrice(), minPrice);
     }
 
-    // Test DutchAuction contract bid()
+    /// @notice Test the DutchAuction contract bid() function
     function test_Bid() public {
         // send NFT to auction contract
         vm.startPrank(deployer);
@@ -147,7 +151,7 @@ contract DutchAuctionTest is Test {
         assertEq(auction.isEscrowed(), false);
     }
 
-    // Test DucthAuction contract noSale()
+    /// @notice Test the DutchAuction contract noSale() function
     function test_noSale() public {
         // send NFT to auction contract
         vm.startPrank(deployer);

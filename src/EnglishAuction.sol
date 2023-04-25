@@ -16,24 +16,47 @@ pragma solidity 0.8.17;
 
 import {IERC721} from "openzeppelin/token/ERC721/IERC721.sol";
 
+/// @title English Auction for NFTs
+/// @author @0xValerius
+/// @notice This contract allows bidding on NFTs in an English Auction style.
 contract EnglishAuction {
-    // Events
+    /// @notice The event emitted when a new bid is placed
     event Bid(address indexed bidder, uint256 amount);
 
+    /// @notice The address of the seller
     address payable public immutable seller;
+
+    /// @notice The duration of the auction in seconds
     uint256 public immutable duration;
+
+    /// @notice The duration of the auction in seconds
     uint256 public immutable startAt;
+
+    /// @notice The duration of the auction in seconds
     uint256 public immutable endAt;
+
+    /// @notice The reserve price of the auction
     uint256 public immutable reservePrice;
 
+    /// @notice The NFT being auctioned
     IERC721 public immutable nft;
+
+    /// @notice The ID of the NFT being auctioned
     uint256 public immutable tokenId;
 
+    /// @notice The current highest bidder
     address public highestBidder;
+
+    /// @notice The current highest bid
     uint256 public highestBid;
 
     mapping(address => uint256) public bids;
 
+    /// @param _duration The duration of the auction in seconds
+    /// @param _startAt The timestamp when the auction starts
+    /// @param _reservePrice The reserve price of the auction
+    /// @param _nft The address of the NFT being auctioned
+    /// @param _tokenId The ID of the NFT being auctioned
     constructor(uint256 _duration, uint256 _startAt, uint256 _reservePrice, address _nft, uint256 _tokenId) {
         require(_duration > 0, "EnglishAuction: duration must be greater than 0.");
         require(_startAt > block.timestamp, "EnglishAuction: startAt must be in the future.");
@@ -48,10 +71,13 @@ contract EnglishAuction {
         tokenId = _tokenId;
     }
 
+    /// @notice Checks if the auctioned NFT is escrowed by this contract
+    /// @return true if the NFT is escrowed, false otherwise
     function isEscrowed() public view returns (bool) {
         return nft.ownerOf(tokenId) == address(this);
     }
 
+    /// @notice Place a bid on the auction
     function bid() external payable {
         require(block.timestamp >= startAt, "EnglishAuction: auction has not started yet.");
         require(block.timestamp <= endAt, "EnglishAuction: auction has already ended.");
@@ -67,6 +93,7 @@ contract EnglishAuction {
         emit Bid(msg.sender, msg.value);
     }
 
+    /// @notice Claim the NFT after the auction has ended
     function claim() external {
         require(block.timestamp > endAt, "EnglishAuction: auction has not ended yet.");
         require(isEscrowed(), "EnglishAuction: NFT is not escrowed.");
@@ -79,6 +106,7 @@ contract EnglishAuction {
         }
     }
 
+    /// @notice Withdraw a losing bid
     function withdraw() external {
         require(msg.sender != highestBidder, "EnglishAuction: highest bidder cannot withdraw.");
         require(bids[msg.sender] > 0, "EnglishAuction: no bid to withdraw.");

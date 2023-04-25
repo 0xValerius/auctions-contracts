@@ -19,6 +19,9 @@ import "forge-std/console.sol";
 import {MockNFT} from "../src/MockERC721.sol";
 import {EnglishAuction} from "../src/EnglishAuction.sol";
 
+/// @title EnglishAuction.sol test contract
+/// @author @0xValerius
+/// @notice This contract tests the EnglishAuction contract using the Forge Test framework.
 contract EnglishAuctionTest is Test {
     MockNFT nft;
     EnglishAuction auction;
@@ -34,6 +37,7 @@ contract EnglishAuctionTest is Test {
     uint256 reservePrice = 100;
     uint256 tokenId = 420;
 
+    /// @notice Set up the test environment
     function setUp() public {
         // load address ether balances
         vm.deal(deployer, initialBalance);
@@ -49,6 +53,7 @@ contract EnglishAuctionTest is Test {
         auction = new EnglishAuction(duration, startAt, reservePrice, address(nft), tokenId);
     }
 
+    /// @notice Test the deployment of the MockNFT contract
     function test_MockNFTDeploy() public {
         assertEq(nft.name(), "MockNFT");
         assertEq(nft.symbol(), "MOCK");
@@ -57,6 +62,7 @@ contract EnglishAuctionTest is Test {
         assertEq(nft.ownerOf(tokenId), deployer);
     }
 
+    /// @notice Test the deployment of the EnglishAuction contract
     function test_EnglishAuctionDeployment() public {
         assertEq(auction.seller(), deployer);
         assertEq(auction.duration(), duration);
@@ -67,6 +73,7 @@ contract EnglishAuctionTest is Test {
         assertEq(auction.tokenId(), tokenId);
     }
 
+    /// @notice Test the escrow process for the EnglishAuction contract
     function test_EnglishAuctionEscrow() public {
         assertEq(auction.isEscrowed(), false);
         vm.startPrank(deployer);
@@ -76,6 +83,7 @@ contract EnglishAuctionTest is Test {
         vm.stopPrank();
     }
 
+    /// @notice Test a successful auction process
     function test_successFullAuction() public {
         vm.startPrank(deployer);
         nft.approve(address(auction), tokenId);
@@ -139,6 +147,7 @@ contract EnglishAuctionTest is Test {
         assertEq(deployer.balance, initialBalance + reservePrice * 3);
     }
 
+    /// @notice Test an empty auction process (no bids placed)
     function test_emptyAuction() public {
         vm.startPrank(deployer);
         nft.approve(address(auction), tokenId);

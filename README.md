@@ -23,9 +23,8 @@ In an English style auction, bidders place successively higher bids until no hig
 ## :rocket: Getting Started
 
 1. Clone this repository. `git clone https://github.com/0xValerius/auctions-contracts.git`
-2. Install the required dependencies. `npm install`
-3. Compile the smart contracts. `forge build`
-4. Run the test suite. `forge test`
+2. Compile the smart contracts. `forge build`
+3. Run the test suite. `forge test`
 
 ## :scroll: License
 

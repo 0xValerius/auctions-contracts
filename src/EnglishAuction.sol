@@ -17,7 +17,7 @@ pragma solidity 0.8.17;
 import {IERC721} from "openzeppelin/token/ERC721/IERC721.sol";
 
 /// @title English Auction for NFTs
-/// @author @0xValerius
+/// @author 0xValerius
 /// @notice This contract allows bidding on NFTs in an English Auction style.
 contract EnglishAuction {
     /// @notice The event emitted when a new bid is placed

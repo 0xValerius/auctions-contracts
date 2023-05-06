@@ -17,7 +17,7 @@ pragma solidity 0.8.17;
 import {IERC721} from "openzeppelin/token/ERC721/IERC721.sol";
 
 /// @title Dutch Auction for NFTs
-/// @author @0xValerius
+/// @author 0xValerius
 /// @notice This contract allows bidding on NFTs in an Dutch Auction style.
 contract DutchAuction {
     /// @notice The address of the seller (auction creator)
